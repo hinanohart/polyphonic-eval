@@ -1,8 +1,8 @@
 """Disagreement spectrum index.
 
-The renamed ``HeteroglossiaIndex``. Combines a Simpson-style concentration term
-(how evenly weight is split across clusters) with a semantic-distance term
-(how far apart clusters are in embedding space).
+Combines a Simpson-style concentration term (how evenly weight is split across
+clusters) with a semantic-distance term (how far apart clusters are in
+embedding space).
 """
 
 from __future__ import annotations

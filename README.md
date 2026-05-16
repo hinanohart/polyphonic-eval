@@ -58,7 +58,7 @@ References: Free-MAD (arXiv 2509.11035), DMAD (ICLR 2025), X-MAS (arXiv 2505.169
 ```python
 # config snippet
 metric_list:
-  - metric: !function polyphonic_eval.adapters.lm_eval.polyphonic
+  - metric: !function polyphonic_eval.adapters.lm_eval.polyphonic_metric
     aggregation: !function polyphonic_eval.adapters.lm_eval.aggregate_polyphonic
     higher_is_better: true
 ```

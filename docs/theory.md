@@ -57,8 +57,9 @@ If you want to dig further into the surrounding research:
   background on engineering with linguistic variation.
 - *Dialogic Evolution of AI Products* (Tandfonline 2024) — peer-reviewed
   Bakhtin × AI direct treatment.
-- *Krippendorff (2018)* — inter-rater agreement, methodological backbone for
-  the consensus module.
+- *Krippendorff (2018)* — inter-rater agreement; v0.1.0 ships with a simple
+  spread-tolerance consensus check (see ``consensus.py``); a Krippendorff α
+  implementation is on the v0.2.0 roadmap.
 
 None of these papers are pre-requisites for the library; they're entry points
 if the idea-space looks interesting.

@@ -30,3 +30,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - This is an alpha release. The wire format of `PolyphonicResult` carries `schema_version: "1"`; future releases will track schema evolution explicitly.
 - Embedder choice dominates cluster structure. For reproducible eval pipelines, pin a specific embedder.
+- v0.1.0 ships without golden fixtures (`tests/golden/`) or formal benchmarks (`benchmarks/`); both are slated for v0.1.1.
+- `consensus.py` uses a simple score-spread-tolerance test in v0.1.0. A Krippendorff α implementation is on the v0.2.0 roadmap.

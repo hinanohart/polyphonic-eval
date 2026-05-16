@@ -1,12 +1,18 @@
-"""Property test: false-positive rate of ``is_irreducible`` under H0.
+"""Property test: ``is_irreducible`` does not fire on H0-paraphrase inputs.
 
 Null hypothesis: rationales are i.i.d. paraphrases of a single underlying view.
 We approximate that by sampling judges whose rationales differ only in
-trivial filler words, plus near-identical scores. Under this null, the test
-should rarely report ``irreducible=True``. We enforce FPR < 10% to keep
-the property test cheap while still asserting the core claim. The spec
-target FPR is < 5% with the default 200-bootstrap, here we use a smaller
-budget for CI speed.
+trivial filler words, plus near-identical scores.
+
+What this test asserts:
+    For every sampled (n=6, paraphrase-pool) panel, ``is_irreducible``
+    returns ``False`` with the production decision rule. This exercises the
+    code path that should trip under H0, but it is **not** a statistical
+    FPR rate estimate — that would require many independent samples and
+    a Wilson-style confidence interval. The stricter spec-target rate
+    (<5%) is a goal for the production default ``n_bootstrap=200``; the
+    CI test below uses ``n_bootstrap=50`` for speed and asserts the
+    binary "never fires" property instead.
 """
 
 from __future__ import annotations
