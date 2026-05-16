@@ -52,6 +52,9 @@ All models are frozen Pydantic v2.
 | ``confidence`` | ``float | None`` | optional self-reported confidence |
 | ``metadata`` | ``Mapping[str, str]`` | freeform extension |
 
+``score`` and ``confidence`` reject ``NaN`` / ``±inf`` at validation time
+(would otherwise silently poison downstream aggregation).
+
 ### ``PolyphonicResult``
 
 | field | type | notes |
@@ -71,6 +74,25 @@ Methods:
 .to_scalar(policy="mean")      # arithmetic mean
 .to_scalar(policy="majority")  # median (scores) or modal-label ratio
 ```
+
+**Refusals (all raise ``TypeError``).** ``PolyphonicResult`` explicitly
+refuses every common scalar-coercion protocol so accidental collapse is hard:
+
+```python
+float(result)       # TypeError
+int(result)         # TypeError
+bool(result)        # TypeError
+result + 1          # TypeError (no __add__)
+result.to_scalar()  # TypeError (default policy='refuse')
+```
+
+Opt in to a scalar via ``policy='mean'`` or ``policy='majority'``.
+
+**Mixed-modality refusal.** ``compute_consensus``, ``collapse_mean``, and
+``collapse_majority`` refuse panels that mix score-having and label-having
+judges non-uniformly (e.g. some judges score-only + others label-only). The
+naive score path would silently erase label-only contributions — exactly the
+failure mode the library exists to prevent.
 
 ### ``ConsensusClaim``
 

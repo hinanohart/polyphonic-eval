@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from collections.abc import Sequence
 
 import numpy as np
@@ -10,12 +11,24 @@ import pytest
 from polyphonic_eval import Embedder, JudgeVerdict
 
 
+def _stable_bucket(token: str, dim: int) -> int:
+    """Hash a token to a bucket index, stable across processes.
+
+    Python's builtin ``hash()`` is randomized per process via ``PYTHONHASHSEED``,
+    so the previous implementation was only "deterministic" within one run.
+    Using ``blake2b`` makes the fixture genuinely repeatable in CI.
+    """
+    digest = hashlib.blake2b(token.encode("utf-8"), digest_size=8).digest()
+    return int.from_bytes(digest, "big") % dim
+
+
 class DeterministicHashEmbedder:
     """Hash-based deterministic embedder. No model load; suitable for unit tests.
 
-    Maps a string to a 64-dim vector by hashing token n-grams. Distances roughly
-    track Jaccard overlap. Not semantically meaningful — used only to exercise
-    clustering machinery without network or model dependencies.
+    Maps a string to a 64-dim vector by hashing token n-grams via blake2b.
+    Distances roughly track Jaccard overlap. Not semantically meaningful —
+    used only to exercise clustering machinery without network or model
+    dependencies. Repeatable across processes regardless of ``PYTHONHASHSEED``.
     """
 
     def __init__(self, dim: int = 64) -> None:
@@ -24,10 +37,8 @@ class DeterministicHashEmbedder:
     def embed(self, texts: Sequence[str]) -> np.ndarray:
         out = np.zeros((len(texts), self.dim), dtype=np.float32)
         for i, text in enumerate(texts):
-            tokens = text.lower().split()
-            for tok in tokens:
-                idx = hash(tok) % self.dim
-                out[i, idx] += 1.0
+            for tok in text.lower().split():
+                out[i, _stable_bucket(tok, self.dim)] += 1.0
         norms = np.linalg.norm(out, axis=1, keepdims=True)
         norms[norms == 0] = 1.0
         return out / norms

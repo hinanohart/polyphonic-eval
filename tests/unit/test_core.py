@@ -20,7 +20,11 @@ def test_aggregate_unanimous(deterministic_embedder, unanimous_verdicts) -> None
     assert result.n_judges == 5
     assert result.consensus.has_consensus is True
     assert result.disagreement.is_irreducible is False
-    assert result.disagreement_spectrum >= 0.0
+    # Unanimous panel must NOT inflate into many synthetic clusters via HDBSCAN
+    # noise singletons (regression guard: previously 4 identical rationales
+    # could become 4 fake clusters with spectrum ~0.69).
+    assert len(result.disagreement.clusters) == 1
+    assert result.disagreement_spectrum == 0.0
 
 
 def test_aggregate_split(deterministic_embedder, split_verdicts) -> None:

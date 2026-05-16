@@ -16,6 +16,10 @@ When you ask 5 LLM judges to score an output and 3 say "good", 1 says "harmful",
 
 ## Quickstart
 
+```bash
+pip install "polyphonic-eval[embed]"     # bundles the default sentence-transformers embedder
+```
+
 ```python
 from polyphonic_eval import aggregate, JudgeVerdict
 
@@ -30,14 +34,17 @@ verdicts = [
 result = aggregate(verdicts, item_id="example-1")
 
 print(result.consensus.has_consensus)         # False
-print(result.disagreement.is_irreducible)     # True
-print(len(result.disagreement.clusters))      # 3 (good, factuality, safety)
-print(result.disagreement_spectrum)           # ~0.74
+print(result.disagreement.is_irreducible)     # True (embedder-dependent)
+print(len(result.disagreement.clusters))      # 2-3 (good vs. factuality/safety)
+print(result.disagreement_spectrum)           # ~0.6-0.8 (embedder-dependent)
 
 # Explicit collapse (opt-in)
-mean = result.to_scalar(policy="mean")        # 0.59
+mean = result.to_scalar(policy="mean")        # 0.57
 # float(result) raises TypeError — refusing scalar collapse is the point.
 ```
+
+The cluster count and spectrum value depend on the embedding model — see the
+"Note on embedders" below.
 
 ## Why it matters
 
@@ -77,8 +84,8 @@ The reducer keeps every judge's vote typed; consumers see a `PolyphonicResult` a
 ## Installation
 
 ```bash
-pip install polyphonic-eval                  # core
-pip install "polyphonic-eval[embed]"         # + sentence-transformers default embedder
+pip install "polyphonic-eval[embed]"         # recommended: bundles default embedder
+pip install polyphonic-eval                  # bring-your-own embedder (must pass embedder= explicitly)
 pip install "polyphonic-eval[langgraph]"     # + LangGraph adapter
 pip install "polyphonic-eval[lm-eval]"       # + lm-evaluation-harness adapter
 pip install "polyphonic-eval[all]"           # everything

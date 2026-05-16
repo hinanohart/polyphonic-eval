@@ -6,9 +6,31 @@ import pytest
 
 from polyphonic_eval.adapters.lm_eval import (
     aggregate_polyphonic,
+    list_judge_verdicts_from_juries,
     list_judge_verdicts_from_jurys,
     polyphonic_metric,
 )
+
+
+def test_list_judge_verdicts_from_juries() -> None:
+    out = list_judge_verdicts_from_juries(
+        [
+            {"judge_id": "j1", "score": 0.5},
+            {"judge_id": "j2", "score": 0.7, "rationale": "ok"},
+        ]
+    )
+    assert len(out) == 2
+    assert out[1].rationale == "ok"
+
+
+def test_jurys_alias_still_works() -> None:
+    # Back-compat alias kept for v0.1.x; deprecated in v0.2.0.
+    assert list_judge_verdicts_from_jurys is list_judge_verdicts_from_juries
+
+
+def test_aggregate_polyphonic_invalid_policy() -> None:
+    with pytest.raises(ValueError, match="scalar_policy"):
+        aggregate_polyphonic([], scalar_policy="median")
 
 
 def test_polyphonic_metric_passes_verdicts_through() -> None:
@@ -60,14 +82,3 @@ def test_aggregate_polyphonic_default_mean(deterministic_embedder, monkeypatch) 
 def test_aggregate_polyphonic_refuse_raises() -> None:
     with pytest.raises(TypeError, match="refuse"):
         aggregate_polyphonic([], scalar_policy="refuse")
-
-
-def test_list_judge_verdicts_from_jurys() -> None:
-    out = list_judge_verdicts_from_jurys(
-        [
-            {"judge_id": "j1", "score": 0.5},
-            {"judge_id": "j2", "score": 0.7, "rationale": "ok"},
-        ]
-    )
-    assert len(out) == 2
-    assert out[1].rationale == "ok"

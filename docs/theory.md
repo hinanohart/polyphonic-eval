@@ -43,8 +43,9 @@ Exactly one operational principle:
 divided by two.**
 
 This is the load-bearing constraint. Everything else — the choice of HDBSCAN,
-the bootstrap stability test, the Krippendorff alpha consensus check — is
-implementation detail that could be swapped without breaking the contract.
+the bootstrap stability test, the score-spread-tolerance consensus check (with
+Krippendorff α planned for v0.2.0) — is implementation detail that could be
+swapped without breaking the contract.
 
 ## Related literature
 

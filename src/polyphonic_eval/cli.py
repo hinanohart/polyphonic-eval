@@ -1,11 +1,13 @@
 """Command-line entry point: ``polyphonic-eval aggregate``.
 
-Optional dependency on ``typer``. The ``[cli]`` extra pulls it in. If typer is
-not present, the entry point raises a helpful ``ImportError`` when invoked.
+Uses :mod:`argparse` (stdlib) so the CLI works on a bare ``pip install
+polyphonic-eval`` with no optional ``[cli]`` extra. ``typer`` is no longer a
+runtime dependency.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from collections.abc import Sequence
@@ -17,7 +19,7 @@ from polyphonic_eval.types import JudgeVerdict
 
 
 def _run(input_path: str, item_id: str, output_path: str | None) -> int:
-    """Shared implementation used by both typer and the no-typer fallback."""
+    """Shared implementation."""
     p = Path(input_path)
     payload = json.loads(p.read_text(encoding="utf-8"))
     if not isinstance(payload, list):
@@ -34,42 +36,48 @@ def _run(input_path: str, item_id: str, output_path: str | None) -> int:
     return 0
 
 
-try:
-    import typer
-except ImportError:  # pragma: no cover
-    app: object | None = None
-else:
-    app = typer.Typer(
-        help="polyphonic-eval: typed multi-judge LLM evaluation.",
-        no_args_is_help=True,
-        add_completion=False,
+def _build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="polyphonic-eval",
+        description="polyphonic-eval: typed multi-judge LLM evaluation.",
     )
+    sub = parser.add_subparsers(dest="command", metavar="COMMAND")
+    sub.required = True
 
-    @app.command(name="aggregate")
-    def aggregate_cli(
-        input_path: str = typer.Argument(..., help="Path to a JSON array of verdicts."),
-        item_id: str = typer.Option("cli-item", "--item-id", help="Item identifier."),
-        output: str | None = typer.Option(
-            None, "--output", "-o", help="Write JSON output to this path."
-        ),
-    ) -> None:
-        """Aggregate verdicts from a JSON file."""
-        raise typer.Exit(_run(input_path, item_id, output))
+    agg = sub.add_parser("aggregate", help="Aggregate verdicts from a JSON file.")
+    agg.add_argument("input_path", help="Path to a JSON array of verdict objects.")
+    agg.add_argument("--item-id", default="cli-item", help="Item identifier (default: cli-item).")
+    agg.add_argument(
+        "-o", "--output", default=None, help="Write JSON output to this path (default: stdout)."
+    )
+    return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """No-typer fallback entry. Honors ``argv[1]`` as input path."""
-    args = list(argv) if argv is not None else sys.argv[1:]
-    if not args or args[0] in ("-h", "--help"):
-        sys.stdout.write(
-            "usage: polyphonic-eval aggregate INPUT [--item-id ID] [--output PATH]\n"
-            "  Install the [cli] extra for the full typer-based CLI.\n"
-        )
-        return 0
-    if args[0] != "aggregate" or len(args) < 2:
-        sys.stderr.write("error: expected 'aggregate INPUT'\n")
-        return 2
-    return _run(args[1], "cli-item", None)
+    """Entry point used by the ``polyphonic-eval`` console script.
+
+    Returns an int return code rather than calling ``sys.exit``. Argparse's own
+    ``SystemExit`` (raised on ``--help`` or argument errors) is caught and its
+    code propagated, so programmatic callers always get an integer back.
+    """
+    parser = _build_parser()
+    try:
+        ns = parser.parse_args(list(argv) if argv is not None else None)
+    except SystemExit as exc:
+        code = exc.code
+        if code is None:
+            return 0
+        if isinstance(code, int):
+            return code
+        return 1
+    if ns.command == "aggregate":
+        return _run(ns.input_path, ns.item_id, ns.output)
+    return 2
+
+
+# Backwards-compat alias so any consumer importing ``cli.app`` still finds a
+# callable entry point.
+app = main
 
 
 if __name__ == "__main__":

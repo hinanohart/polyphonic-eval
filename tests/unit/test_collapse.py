@@ -44,3 +44,41 @@ def test_collapse_majority_labels_only() -> None:
 def test_collapse_majority_empty_raises() -> None:
     with pytest.raises(ValueError, match="scores or labels"):
         collapse_majority([JudgeVerdict(judge_id="j1")])
+
+
+def _mixed_modality_verdicts() -> list[JudgeVerdict]:
+    return [
+        JudgeVerdict(judge_id="j1", score=0.9),
+        JudgeVerdict(judge_id="j2", score=0.9),
+        JudgeVerdict(judge_id="j3", label="harmful"),
+        JudgeVerdict(judge_id="j4", label="harmful"),
+    ]
+
+
+def test_collapse_mean_refuses_mixed_modality() -> None:
+    with pytest.raises(TypeError, match="mixed-modality"):
+        collapse_mean(_mixed_modality_verdicts())
+
+
+def test_collapse_majority_refuses_mixed_modality() -> None:
+    with pytest.raises(TypeError, match="mixed-modality"):
+        collapse_majority(_mixed_modality_verdicts())
+
+
+def _dual_modality_plus_label_only() -> list[JudgeVerdict]:
+    # Regression: judge with BOTH score+label paired with label-only judge.
+    # Previously slipped past the disjoint-subset detector.
+    return [
+        JudgeVerdict(judge_id="j1", score=0.9, label="good"),
+        JudgeVerdict(judge_id="j2", label="harmful"),
+    ]
+
+
+def test_collapse_mean_refuses_dual_modality_gap() -> None:
+    with pytest.raises(TypeError, match="mixed-modality"):
+        collapse_mean(_dual_modality_plus_label_only())
+
+
+def test_collapse_majority_refuses_dual_modality_gap() -> None:
+    with pytest.raises(TypeError, match="mixed-modality"):
+        collapse_majority(_dual_modality_plus_label_only())

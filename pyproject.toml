@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "polyphonic-eval"
-version = "0.1.0"
+version = "0.1.1"
 description = "Multi-judge LLM evaluation that returns typed disagreement structure instead of collapsing it to a scalar."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -45,12 +45,10 @@ dependencies = [
 embed = ["sentence-transformers>=2.5"]
 langgraph = ["langgraph>=0.2"]
 lm-eval = ["lm-eval>=0.4"]
-cli = ["typer>=0.12"]
 all = [
     "sentence-transformers>=2.5",
     "langgraph>=0.2",
     "lm-eval>=0.4",
-    "typer>=0.12",
 ]
 dev = [
     "pytest>=8",
@@ -61,11 +59,10 @@ dev = [
     "ruff>=0.5",
     "build>=1.2",
     "twine>=5",
-    "typer>=0.12",
 ]
 
 [project.scripts]
-polyphonic-eval = "polyphonic_eval.cli:app"
+polyphonic-eval = "polyphonic_eval.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/hinanohart/polyphonic-eval"
@@ -138,7 +135,6 @@ module = [
     "scipy.*",
     "sentence_transformers",
     "sentence_transformers.*",
-    "typer",
     "langgraph.*",
 ]
 ignore_missing_imports = true

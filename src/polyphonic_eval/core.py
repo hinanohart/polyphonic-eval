@@ -139,6 +139,7 @@ def aggregate(
         n_bootstrap=cfg.bootstrap_iters,
         ari_threshold=cfg.ari_threshold,
         rng_seed=cfg.rng_seed,
+        embeddings=embeddings,
     )
 
     clusters = _build_clusters(verdicts_t, embeddings, labels, top_k=cfg.keyword_top_k)
@@ -209,22 +210,37 @@ def _build_clusters(
     *,
     top_k: int,
 ) -> list[DisagreementCluster]:
-    """Group verdict indices by HDBSCAN label; noise points become singletons."""
+    """Group verdict indices by HDBSCAN label.
+
+    HDBSCAN noise points (label ``-1``) are gathered into a single
+    "unclustered" cluster rather than promoted to one synthetic singleton each.
+    The old behaviour inflated ``disagreement_spectrum`` whenever the embedder
+    produced any noise — unanimous panels of 4+ paraphrased rationales would
+    show 4 fake clusters. See critic audit 2026-05-17.
+    """
     groups: dict[int, list[int]] = defaultdict(list)
     for i, lbl in enumerate(labels.tolist()):
         groups[int(lbl)].append(i)
 
     real = {k: v for k, v in groups.items() if k >= 0}
     noise = groups.get(-1, [])
-    next_synthetic = max((k for k in real), default=-1) + 1
 
     out: list[DisagreementCluster] = []
     total = len(verdicts)
+
+    if not real:
+        # All-noise: HDBSCAN found no structure. Represent as one "unclustered"
+        # cluster carrying every judge — concentration term will be 1, giving
+        # spectrum 0 (no detected disagreement).
+        if noise:
+            out.append(_cluster_from_indices(0, noise, verdicts, embeddings, total, top_k))
+        return out
+
     for cid in sorted(real):
         out.append(_cluster_from_indices(cid, real[cid], verdicts, embeddings, total, top_k))
-    for idx in noise:
-        out.append(_cluster_from_indices(next_synthetic, [idx], verdicts, embeddings, total, top_k))
-        next_synthetic += 1
+    if noise:
+        unclustered_id = max(real) + 1
+        out.append(_cluster_from_indices(unclustered_id, noise, verdicts, embeddings, total, top_k))
     return out
 
 

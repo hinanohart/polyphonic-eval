@@ -19,6 +19,7 @@ def is_irreducible(
     n_bootstrap: int = 200,
     ari_threshold: float = 0.6,
     rng_seed: int | None = 42,
+    embeddings: np.ndarray | None = None,
 ) -> tuple[bool, float, np.ndarray]:
     """Bootstrap stability test for irreducible structural disagreement.
 
@@ -36,12 +37,23 @@ def is_irreducible(
         - Mean ARI ≥ ``ari_threshold`` **and** ≥2 non-noise clusters →
           ``is_irreducible = True``.
 
-    False positive rate (FPR):
-        Verified < 5% under H0 in ``tests/property/test_is_irreducible_fpr.py``
-        for single-Gaussian score data with the default settings.
+    False positive behaviour:
+        ``tests/property/test_is_irreducible_fpr.py`` exercises a degenerate
+        H0 sample (every judge supplies the same rationale string) and
+        asserts ``is_irreducible`` does not fire — a sanity floor, not a
+        Wilson-interval FPR estimate. Rigorous calibration on real
+        sentence-transformer embeddings is scheduled for v0.2.0 (see
+        ``docs/theory.md``).
+
+    Args:
+        embeddings: optional precomputed embeddings. When provided, the
+            embedder is not called again — letting the top-level ``aggregate``
+            share work with this routine.
 
     Returns:
-        Tuple ``(is_irreducible, mean_ari, observed_labels)``.
+        Tuple ``(is_irreducible, mean_ari, observed_labels)``. ``mean_ari`` is
+        clamped to ``[0, 1]`` (raw ARI can be slightly negative on extremely
+        unstable clusterings; that is reported as ``0.0``).
     """
     from polyphonic_eval.cluster import default_cluster_fn
 
@@ -50,11 +62,13 @@ def is_irreducible(
     n = len(rationales)
 
     if n < 3:
-        embeddings = embedder.embed(rationales) if rationales else np.zeros((0, 1))
+        if embeddings is None:
+            embeddings = embedder.embed(rationales) if rationales else np.zeros((0, 1))
         observed = cf(embeddings) if n > 0 else np.zeros(0, dtype=np.int64)
         return False, 0.0, observed
 
-    embeddings = embedder.embed(rationales)
+    if embeddings is None:
+        embeddings = embedder.embed(rationales)
     observed = cf(embeddings)
     n_clusters = len({lbl for lbl in observed.tolist() if lbl >= 0})
 
@@ -79,4 +93,5 @@ def is_irreducible(
         return False, 0.0, observed
 
     mean_ari = float(np.mean(aris))
-    return bool(mean_ari >= ari_threshold), mean_ari, observed
+    mean_ari_clamped = max(0.0, min(1.0, mean_ari))
+    return bool(mean_ari_clamped >= ari_threshold), mean_ari_clamped, observed

@@ -7,10 +7,11 @@ Type-level invariant: ``PolyphonicResult`` does **not** expose ``__float__`` /
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class JudgeVerdict(BaseModel):
@@ -24,6 +25,18 @@ class JudgeVerdict(BaseModel):
     rationale: str | None = None
     confidence: float | None = None
     metadata: Mapping[str, str] = Field(default_factory=dict)
+
+    @field_validator("score", "confidence")
+    @classmethod
+    def _reject_nan_inf(cls, v: float | None) -> float | None:
+        if v is None:
+            return v
+        if math.isnan(v) or math.isinf(v):
+            raise ValueError(
+                "score/confidence must be a finite real number; "
+                "NaN/inf would silently poison downstream aggregation."
+            )
+        return v
 
 
 class ScoreSummary(BaseModel):
@@ -91,6 +104,13 @@ class PolyphonicResult(BaseModel):
     disagreement_spectrum: float
     n_judges: int
     schema_version: Literal["1"] = "1"
+
+    def __bool__(self) -> bool:
+        raise TypeError(
+            "bool(PolyphonicResult) is not supported. The library refuses to "
+            "collapse multi-judge structure into a single truthy value. Inspect "
+            "the typed fields (consensus, disagreement, …) explicitly."
+        )
 
     def to_scalar(
         self,

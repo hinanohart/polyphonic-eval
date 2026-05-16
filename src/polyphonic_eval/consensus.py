@@ -35,6 +35,20 @@ def compute_consensus(
     if not verdicts:
         return ConsensusClaim(has_consensus=False, agreeing_judges=(), agreement_strength=0.0)
 
+    any_score = any(v.score is not None for v in verdicts)
+    any_label = any(v.label is not None for v in verdicts)
+    all_score = all(v.score is not None for v in verdicts)
+    all_label = all(v.label is not None for v in verdicts)
+    # "Mixed" = both modalities appear in the panel, but neither is uniform.
+    # Examples that must refuse:
+    #   - some judges score-only, others label-only
+    #   - judge A has BOTH score+label, judge B has label-only
+    # Examples that are OK:
+    #   - all judges have score (and maybe label too); use score path
+    #   - all judges have label (and maybe score too); use label path
+    if any_score and any_label and not (all_score and all_label):
+        return ConsensusClaim(has_consensus=False, agreeing_judges=(), agreement_strength=0.0)
+
     scores = [v.score for v in verdicts if v.score is not None]
     labels = [v.label for v in verdicts if v.label is not None]
 

@@ -87,3 +87,32 @@ def test_round_trip_json() -> None:
     payload = result.model_dump_json()
     restored = PolyphonicResult.model_validate_json(payload)
     assert restored == result
+
+
+def test_bool_on_polyphonic_result_refuses() -> None:
+    result = _make_result()
+    with pytest.raises(TypeError, match="bool"):
+        bool(result)
+
+
+def test_judge_verdict_rejects_nan_score() -> None:
+    with pytest.raises(ValueError, match="finite"):
+        JudgeVerdict(judge_id="j1", score=float("nan"))
+
+
+def test_judge_verdict_rejects_inf_score() -> None:
+    with pytest.raises(ValueError, match="finite"):
+        JudgeVerdict(judge_id="j1", score=float("inf"))
+
+
+def test_judge_verdict_rejects_nan_confidence() -> None:
+    with pytest.raises(ValueError, match="finite"):
+        JudgeVerdict(judge_id="j1", score=0.5, confidence=float("nan"))
+
+
+def test_int_and_arithmetic_on_result_refused() -> None:
+    result = _make_result()
+    with pytest.raises(TypeError):
+        int(result)
+    with pytest.raises(TypeError):
+        result + 1  # type: ignore[operator]

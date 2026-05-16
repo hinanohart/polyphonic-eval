@@ -1,7 +1,8 @@
 """01 — Quickstart. Five judges, one item, typed result.
 
-Run with::
+Install the embedder extra (default sentence-transformers wrapper) first::
 
+    pip install 'polyphonic-eval[embed]'
     python examples/01_quickstart.py
 """
 

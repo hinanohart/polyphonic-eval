@@ -34,12 +34,10 @@ def test_split_with_distinct_rationales_produces_measurable_stability(
         deterministic_embedder,
         n_bootstrap=100,
     )
-    # Bootstrap stability for clearly-separated duplicate-text groups should
-    # comfortably exceed the bootstrap-only-noise FPR baseline (~0.0 to 0.1).
-    assert stab > 0.3
-    # And the irreducibility verdict is True given mean ARI well above threshold
-    # for this structured input; assert observation.
-    assert is_irr is True or stab > 0.5
+    # Two perfectly-duplicate text groups of size 8 each give HDBSCAN a
+    # textbook separable problem; mean ARI under bootstrap is essentially 1.0.
+    assert stab > 0.6
+    assert is_irr is True
 
 
 def test_too_few_verdicts_returns_not_irreducible(deterministic_embedder) -> None:

@@ -15,10 +15,12 @@ Usage in a custom task YAML::
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
-from typing import Any
+from typing import Any, Literal, cast
 
 from polyphonic_eval.core import aggregate
 from polyphonic_eval.types import JudgeVerdict, PolyphonicResult
+
+_VALID_POLICIES = ("mean", "majority")
 
 
 def polyphonic_metric(item: Any) -> dict[str, Any]:
@@ -47,18 +49,21 @@ def aggregate_polyphonic(
     The full per-item ``PolyphonicResult`` JSON is included in the return dict
     under ``"polyphonic_results"`` for downstream consumption.
     """
-    results: list[PolyphonicResult] = []
-    for raw in items:
-        verdicts = [JudgeVerdict.model_validate(v) for v in raw["verdicts"]]
-        results.append(aggregate(verdicts, item_id=raw.get("item_id", "unknown")))
-
     if scalar_policy == "refuse":
         raise TypeError(
             "aggregate_polyphonic was called with scalar_policy='refuse', but "
             "lm-evaluation-harness expects a scalar. Pass 'mean' or 'majority'."
         )
+    if scalar_policy not in _VALID_POLICIES:
+        raise ValueError(f"scalar_policy must be one of {_VALID_POLICIES}, got {scalar_policy!r}.")
+    policy_lit = cast(Literal["mean", "majority"], scalar_policy)
 
-    scalars = [r.to_scalar(policy=scalar_policy) for r in results]  # type: ignore[arg-type]
+    results: list[PolyphonicResult] = []
+    for raw in items:
+        verdicts = [JudgeVerdict.model_validate(v) for v in raw["verdicts"]]
+        results.append(aggregate(verdicts, item_id=raw.get("item_id", "unknown")))
+
+    scalars = [r.to_scalar(policy=policy_lit) for r in results]
     mean_scalar = sum(scalars) / len(scalars) if scalars else 0.0
     return {
         "score": mean_scalar,
@@ -68,6 +73,10 @@ def aggregate_polyphonic(
     }
 
 
-def list_judge_verdicts_from_jurys(jury_outputs: Iterable[dict[str, Any]]) -> list[JudgeVerdict]:
+def list_judge_verdicts_from_juries(jury_outputs: Iterable[dict[str, Any]]) -> list[JudgeVerdict]:
     """Convenience: convert a sequence of plain dicts into ``JudgeVerdict`` objects."""
     return [JudgeVerdict.model_validate(j) for j in jury_outputs]
+
+
+# Deprecated alias (typo: "jurys"). Will be removed in v0.2.0.
+list_judge_verdicts_from_jurys = list_judge_verdicts_from_juries

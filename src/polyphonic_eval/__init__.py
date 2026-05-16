@@ -3,7 +3,7 @@
 Public API re-exports. Implementation lives in submodules.
 """
 
-from polyphonic_eval.core import PolyphonicAggregator, aggregate
+from polyphonic_eval.core import AggregatorConfig, PolyphonicAggregator, aggregate
 from polyphonic_eval.embed import Embedder, default_embedder
 from polyphonic_eval.types import (
     ConsensusClaim,
@@ -15,6 +15,7 @@ from polyphonic_eval.types import (
 )
 
 __all__ = [
+    "AggregatorConfig",
     "ConsensusClaim",
     "DisagreementCluster",
     "Embedder",
@@ -28,4 +29,4 @@ __all__ = [
     "default_embedder",
 ]
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
