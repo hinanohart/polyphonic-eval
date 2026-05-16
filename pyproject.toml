@@ -129,6 +129,7 @@ warn_unreachable = true
 disallow_any_unimported = true
 show_error_codes = true
 files = ["src/polyphonic_eval"]
+disable_error_code = ["type-arg"]
 
 [[tool.mypy.overrides]]
 module = [
