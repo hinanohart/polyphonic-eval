@@ -1,0 +1,35 @@
+site_name: polyphonic-eval
+site_description: Typed multi-judge LLM evaluation that doesn't collapse minority signal.
+repo_url: https://github.com/hinanohart/polyphonic-eval
+repo_name: hinanohart/polyphonic-eval
+edit_uri: edit/main/docs/
+
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - API reference: api.md
+  - Migration: migration.md
+  - Adapters:
+      - lm-evaluation-harness: adapters/lm_eval.md
+      - LangGraph: adapters/langgraph.md
+  - Background:
+      - Theory and naming: theory.md
+  - Design records:
+      - 0001 No consensus collapse: design/0001-no-consensus-collapse.md
+      - 0002 Jargon ceiling: design/0002-jargon-ceiling.md
+      - 0003 Embedder protocol: design/0003-embedder-protocol.md
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.details
+  - toc:
+      permalink: true

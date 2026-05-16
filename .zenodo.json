@@ -1,0 +1,22 @@
+{
+  "title": "polyphonic-eval: typed multi-judge LLM evaluation",
+  "description": "Multi-judge LLM evaluation that returns typed disagreement structure instead of collapsing it to a scalar. Pluggable into lm-evaluation-harness and LangGraph.",
+  "upload_type": "software",
+  "license": "Apache-2.0",
+  "access_right": "open",
+  "keywords": [
+    "llm",
+    "evaluation",
+    "multi-judge",
+    "disagreement",
+    "aggregation",
+    "polyphonic"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isSupplementTo",
+      "identifier": "https://github.com/hinanohart/polyphonic-eval",
+      "resource_type": "software"
+    }
+  ]
+}

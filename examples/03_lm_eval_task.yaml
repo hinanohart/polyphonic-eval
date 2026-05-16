@@ -1,0 +1,33 @@
+# Example lm-evaluation-harness task config.
+#
+# Install:
+#   pip install 'polyphonic-eval[lm-eval,embed]'
+#
+# Each per-doc output should expose a `verdicts` list, where each entry is a
+# JudgeVerdict-shaped dict. The polyphonic_metric passes those through; the
+# aggregator computes a typed PolyphonicResult per item and exposes both a
+# scalar for the harness's table-formatter and the full structured results
+# under `polyphonic_results`.
+
+task: my_polyphonic_task
+description: |
+  Example task scoring with multi-judge ensemble.
+
+dataset_path: my/dataset
+training_split: train
+validation_split: validation
+
+doc_to_text: !function my_module.format_prompt
+doc_to_target: !function my_module.extract_target
+
+# The output of process_results should be a dict with at minimum a
+# `verdicts` field; see docs/adapters/lm_eval.md.
+process_results: !function my_module.score_with_jury
+
+metric_list:
+  - metric: !function polyphonic_eval.adapters.lm_eval.polyphonic_metric
+    aggregation: !function polyphonic_eval.adapters.lm_eval.aggregate_polyphonic
+    higher_is_better: true
+
+metadata:
+  version: 1

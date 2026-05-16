@@ -35,7 +35,7 @@ def test_split_with_distinct_rationales_produces_measurable_stability(
         n_bootstrap=100,
     )
     # Bootstrap stability for clearly-separated duplicate-text groups should
-    # comfortably exceed the bootstrap-only-noise FPR baseline (~0.0–0.1).
+    # comfortably exceed the bootstrap-only-noise FPR baseline (~0.0 to 0.1).
     assert stab > 0.3
     # And the irreducibility verdict is True given mean ARI well above threshold
     # for this structured input; assert observation.
