@@ -55,6 +55,6 @@ on the structure.
 ## Upstream collaboration
 
 We plan to open a PR/issue on EleutherAI/lm-evaluation-harness within two
-weeks of v0.1.0 release proposing first-class support for aggregators that
-return structured (dict) outputs rather than scalars. Track the issue in the
-repo for upstream-status updates.
+weeks of the v0.1.0 release (May 2026) proposing first-class support for
+aggregators that return structured (dict) outputs rather than scalars.
+Track the issue in this repo for upstream-status updates.

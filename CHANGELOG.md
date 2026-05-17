@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] — 2026-05-17
+
+### Fixed
+
+- **Dependency lower bounds for numpy 2.x compatibility.** ``scipy>=1.14``
+  (was ``>=1.11``), ``scikit-learn>=1.5`` (was ``>=1.4``), and
+  ``hdbscan>=0.8.40`` (was ``>=0.8.38``) are required so a fresh
+  ``pip install polyphonic-eval[embed]`` is guaranteed to land on a
+  numpy-2-compatible stack instead of letting pip's resolver pick a
+  numpy-2 + scipy-1.11 combination that fails at import time.
+- **Release workflow no longer emits the full CHANGELOG as the GitHub
+  Release body.** ``.github/workflows/publish.yml`` now extracts only
+  the current tag's section from ``CHANGELOG.md``.
+
+### Changed
+
+- **Docs.** ``docs/api.md`` no longer claims the library calls
+  ``isinstance(obj, Embedder)`` at runtime (the protocol is
+  ``@runtime_checkable``, but the library duck-types ``.embed``). The
+  ``JudgeVerdict.score`` field documents the ``[0, 1]`` convention and
+  the ``consensus_score_tolerance`` interaction. Lingering
+  "v0.1.0 ships..." phrasing in ``docs/theory.md``,
+  ``docs/design/0003-embedder-protocol.md``, and
+  ``docs/adapters/lm_eval.md`` updated to ``v0.1.x`` /
+  past tense.
+
+### Notes
+
+- Bug-fix release; wire format (``schema_version="1"``) unchanged. No API
+  surface added or removed. ``score`` range is documented as a convention,
+  **not** enforced at validation (enforcement would be a SemVer minor).
+
 ## [0.1.1] — 2026-05-17
 
 ### Fixed

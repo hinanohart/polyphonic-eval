@@ -34,8 +34,10 @@ class Embedder(Protocol):
     def embed(self, texts: Sequence[str]) -> np.ndarray: ...
 ```
 
-Anything with an ``embed(texts) -> (n, d)`` method is an embedder. The library
-calls ``isinstance(obj, Embedder)`` at runtime when needed.
+Anything with an ``embed(texts) -> (n, d)`` method is an embedder. The
+protocol is decorated ``@runtime_checkable`` so user code may use
+``isinstance(obj, Embedder)`` for shape checks; the library itself does
+not perform that check — it duck-types the ``.embed`` call.
 
 ## Model types
 
@@ -54,6 +56,13 @@ All models are frozen Pydantic v2.
 
 ``score`` and ``confidence`` reject ``NaN`` / ``±inf`` at validation time
 (would otherwise silently poison downstream aggregation).
+
+**Score scale convention.** The library convention is ``score ∈ [0, 1]``
+(higher = better). Other scales work mechanically, but ``AggregatorConfig``
+defaults — notably ``consensus_score_tolerance=0.15`` — assume the [0, 1]
+range; using e.g. 0–100 scale without bumping the tolerance will
+silently report no-consensus on inputs that visually agree. The range
+is **not** enforced at validation in v0.1.x to keep adapters flexible.
 
 ### ``PolyphonicResult``
 

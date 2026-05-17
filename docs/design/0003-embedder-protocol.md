@@ -49,4 +49,4 @@ Two failure modes to avoid:
 
 - **No default embedder**: rejected; hurts adoption.
 - **Multiple default embedders auto-selected per language**: deferred to a
-  future version; for v0.1.0 we pin a single English-only default.
+  future version; v0.1.x pins a single English-only default.

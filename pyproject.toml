@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "polyphonic-eval"
-version = "0.1.1"
+version = "0.1.2"
 description = "Multi-judge LLM evaluation that returns typed disagreement structure instead of collapsing it to a scalar."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -36,9 +36,9 @@ classifiers = [
 dependencies = [
     "pydantic>=2.7,<3",
     "numpy>=1.26,<3",
-    "scipy>=1.11,<2",
-    "scikit-learn>=1.4,<2",
-    "hdbscan>=0.8.38,<1",
+    "scipy>=1.14,<2",
+    "scikit-learn>=1.5,<2",
+    "hdbscan>=0.8.40,<1",
 ]
 
 [project.optional-dependencies]

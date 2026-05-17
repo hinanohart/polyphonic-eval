@@ -15,7 +15,14 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class JudgeVerdict(BaseModel):
-    """One judge's verdict on a single evaluation item."""
+    """One judge's verdict on a single evaluation item.
+
+    Score convention: ``score ∈ [0, 1]`` (higher = better). The range is
+    *not* enforced at validation in v0.1.x (adapters that surface raw
+    0–10 / 0–100 scales still work), but :class:`AggregatorConfig`
+    defaults (``consensus_score_tolerance=0.15``) assume [0, 1]; bump the
+    tolerance if you feed a different scale.
+    """
 
     model_config = ConfigDict(frozen=True)
 
