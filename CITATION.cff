@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Multi-judge LLM evaluation that returns typed disagreement structure instead of scalar scores"
+authors:
+  - family-names: "Hart"
+    given-names: "Hinano"
+    alias: "hinanohart"
+type: software
+license: "NOASSERTION"
+repository-code: "https://github.com/hinanohart/polyphonic-eval"
+url: "https://pypi.org/project/polyphonic-eval/"
+version: "0.1.2"
+date-released: "2026-05-16"
+keywords:
+  - "clustering"
+  - "disagreement"
+  - "langgraph"
+  - "llm-evaluation"
+  - "multi-judge"
+  - "pypi"
+  - "python"
