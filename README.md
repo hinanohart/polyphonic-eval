@@ -99,4 +99,4 @@ The package name nods to Mikhail Bakhtin's *polyphony* — a literary-critical o
 
 ## License
 
-Apache-2.0. See `LICENSE`.
+MIT. See `LICENSE`.
