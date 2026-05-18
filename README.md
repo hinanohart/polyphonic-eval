@@ -2,7 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/polyphonic-eval.svg)](https://pypi.org/project/polyphonic-eval/)
 [![Python](https://img.shields.io/pypi/pyversions/polyphonic-eval.svg)](https://pypi.org/project/polyphonic-eval/)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![CI](https://github.com/hinanohart/polyphonic-eval/actions/workflows/ci.yml/badge.svg)](https://github.com/hinanohart/polyphonic-eval/actions/workflows/ci.yml)
 
 **Multi-judge LLM evaluation that doesn't collapse minority signal.**
