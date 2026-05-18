@@ -8,7 +8,7 @@ version = "0.1.2"
 description = "Multi-judge LLM evaluation that returns typed disagreement structure instead of collapsing it to a scalar."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "Apache-2.0" }
+license = { text = "MIT" }
 authors = [{ name = "polyphonic-eval contributors" }]
 keywords = [
     "llm",
@@ -22,7 +22,7 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
