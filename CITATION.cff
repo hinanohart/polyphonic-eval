@@ -6,7 +6,7 @@ authors:
     given-names: "Hinano"
     alias: "hinanohart"
 type: software
-license: "NOASSERTION"
+license: MIT
 repository-code: "https://github.com/hinanohart/polyphonic-eval"
 url: "https://pypi.org/project/polyphonic-eval/"
 version: "0.1.2"
