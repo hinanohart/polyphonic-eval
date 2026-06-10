@@ -12,25 +12,6 @@ When you ask 5 LLM judges to score an output and 3 say "good", 1 says "harmful",
 
 ---
 
-## Architecture
-
-```mermaid
-flowchart TD
-    Verdicts[JudgeVerdict list] --> Embedder[Embedder<br>rationale embeddings]
-    Embedder --> Cluster[HDBSCAN Clustering<br>cluster.py]
-    Cluster --> Irreducible[Irreducibility Check<br>bootstrap ARI<br>irreducible.py]
-    Cluster --> Spectrum[Disagreement Spectrum<br>spectrum.py]
-    Verdicts --> Consensus[Consensus Check<br>consensus.py]
-    Irreducible --> Result[PolyphonicResult<br>types.py]
-    Spectrum --> Result
-    Consensus --> Result
-    Result --> Adapters[Adapters]
-    Adapters --> LMEval[lm-evaluation-harness]
-    Adapters --> LangGraph[LangGraph reducer]
-```
-
----
-
 ## Quickstart
 
 ```bash
@@ -72,6 +53,25 @@ The cluster count and spectrum value depend on the embedding model. See the "Not
 4. **Compute disagreement spectrum**: a scalar in `[0, 1]` reflecting how spread apart the cluster centroids are in embedding space. Zero means judges clumped together; higher means distinct camps.
 5. **Check consensus**: separately from clustering, a score-tolerance check identifies whether a quorum of judges agreed within a numeric band.
 6. **Return `PolyphonicResult`**: a frozen Pydantic model holding all of the above. `__float__` is not implemented; `__bool__` is explicitly implemented to raise `TypeError` — both coercions are blocked, callers must inspect typed fields.
+
+---
+
+## Architecture
+
+```mermaid
+flowchart TD
+    Verdicts[JudgeVerdict list] --> Embedder[Embedder<br>rationale embeddings]
+    Embedder --> Cluster[HDBSCAN Clustering<br>cluster.py]
+    Cluster --> Irreducible[Irreducibility Check<br>bootstrap ARI<br>irreducible.py]
+    Cluster --> Spectrum[Disagreement Spectrum<br>spectrum.py]
+    Verdicts --> Consensus[Consensus Check<br>consensus.py]
+    Irreducible --> Result[PolyphonicResult<br>types.py]
+    Spectrum --> Result
+    Consensus --> Result
+    Result --> Adapters[Adapters]
+    Adapters --> LMEval[lm-evaluation-harness]
+    Adapters --> LangGraph[LangGraph reducer]
+```
 
 ---
 
