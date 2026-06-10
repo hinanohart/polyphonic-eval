@@ -16,12 +16,12 @@ When you ask 5 LLM judges to score an output and 3 say "good", 1 says "harmful",
 
 ```mermaid
 flowchart TD
-    Verdicts[JudgeVerdict list] --> Embedder[Embedder\nrationale embeddings]
-    Embedder --> Cluster[HDBSCAN Clustering\ncluster.py]
-    Cluster --> Irreducible[Irreducibility Check\nbootstrap ARI\nirreducible.py]
-    Cluster --> Spectrum[Disagreement Spectrum\nspectrum.py]
-    Verdicts --> Consensus[Consensus Check\nconsensus.py]
-    Irreducible --> Result[PolyphonicResult\ntypes.py]
+    Verdicts[JudgeVerdict list] --> Embedder[Embedder<br>rationale embeddings]
+    Embedder --> Cluster[HDBSCAN Clustering<br>cluster.py]
+    Cluster --> Irreducible[Irreducibility Check<br>bootstrap ARI<br>irreducible.py]
+    Cluster --> Spectrum[Disagreement Spectrum<br>spectrum.py]
+    Verdicts --> Consensus[Consensus Check<br>consensus.py]
+    Irreducible --> Result[PolyphonicResult<br>types.py]
     Spectrum --> Result
     Consensus --> Result
     Result --> Adapters[Adapters]
