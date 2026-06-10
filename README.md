@@ -18,7 +18,7 @@ When you ask 5 LLM judges to score an output and 3 say "good", 1 says "harmful",
 flowchart TD
     Verdicts[JudgeVerdict list] --> Embedder[Embedder\nrationale embeddings]
     Embedder --> Cluster[HDBSCAN Clustering\ncluster.py]
-    Cluster --> Irreducible[Irreducibility Check\nbootstrap ARI\nirrreducible.py]
+    Cluster --> Irreducible[Irreducibility Check\nbootstrap ARI\nirreducible.py]
     Cluster --> Spectrum[Disagreement Spectrum\nspectrum.py]
     Verdicts --> Consensus[Consensus Check\nconsensus.py]
     Irreducible --> Result[PolyphonicResult\ntypes.py]
