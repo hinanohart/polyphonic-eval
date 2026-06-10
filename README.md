@@ -8,11 +8,28 @@
 **Multi-judge LLM evaluation that doesn't collapse minority signal.**
 Returns typed disagreement structure, plugs into `lm-evaluation-harness` and LangGraph.
 
+When you ask 5 LLM judges to score an output and 3 say "good", 1 says "harmful", 1 says "factually wrong", a `mean` or `majority` reduction throws away two distinct concerns. `polyphonic-eval` preserves them as typed clusters and **refuses** scalar collapse by default — callers must explicitly opt in.
+
 ---
 
-## What it does
+## Architecture
 
-When you ask 5 LLM judges to score an output and 3 say "good", 1 says "harmful", 1 says "factually wrong", a `mean` or `majority` reduction throws away two distinct concerns. `polyphonic-eval` preserves them as typed clusters and **refuses** scalar collapse by default — callers must explicitly opt in.
+```mermaid
+flowchart TD
+    Verdicts[JudgeVerdict list] --> Embedder[Embedder\nrationale embeddings]
+    Embedder --> Cluster[HDBSCAN Clustering\ncluster.py]
+    Cluster --> Irreducible[Irreducibility Check\nbootstrap ARI\nirrreducible.py]
+    Cluster --> Spectrum[Disagreement Spectrum\nspectrum.py]
+    Verdicts --> Consensus[Consensus Check\nconsensus.py]
+    Irreducible --> Result[PolyphonicResult\ntypes.py]
+    Spectrum --> Result
+    Consensus --> Result
+    Result --> Adapters[Adapters]
+    Adapters --> LMEval[lm-evaluation-harness]
+    Adapters --> LangGraph[LangGraph reducer]
+```
+
+---
 
 ## Quickstart
 
@@ -43,8 +60,20 @@ mean = result.to_scalar(policy="mean")        # 0.57
 # float(result) raises TypeError — refusing scalar collapse is the point.
 ```
 
-The cluster count and spectrum value depend on the embedding model — see the
-"Note on embedders" below.
+The cluster count and spectrum value depend on the embedding model. See the "Note on embedders" section below.
+
+---
+
+## How it works
+
+1. **Embed rationales**: each judge's rationale text is embedded with a sentence embedder (default: `sentence-transformers/all-MiniLM-L6-v2`).
+2. **Cluster with HDBSCAN**: rationale embeddings are clustered to find semantically distinct groups of judges. Noise points (HDBSCAN label `-1`) are gathered into a single "unclustered" cluster rather than inflating the cluster count.
+3. **Bootstrap irreducibility check**: the cluster assignment is resampled N times and Adjusted Rand Index is computed. If the mean ARI exceeds the threshold (`0.6` by default), the disagreement is declared *irreducible* — the judge groups are structurally stable, not random variation.
+4. **Compute disagreement spectrum**: a scalar in `[0, 1]` reflecting how spread apart the cluster centroids are in embedding space. Zero means judges clumped together; higher means distinct camps.
+5. **Check consensus**: separately from clustering, a score-tolerance check identifies whether a quorum of judges agreed within a numeric band.
+6. **Return `PolyphonicResult`**: a frozen Pydantic model holding all of the above. `__float__` and `__bool__` are deliberately not implemented — callers must inspect typed fields.
+
+---
 
 ## Why it matters
 
@@ -58,11 +87,27 @@ RLHF/DPO training on multi-rater data routinely averages or majority-votes annot
 
 References: Free-MAD (arXiv 2509.11035), DMAD (ICLR 2025), X-MAS (arXiv 2505.16997), sociolinguistic foundations of LM evaluation (arXiv 2407.09241).
 
+---
+
+## Installation
+
+```bash
+pip install "polyphonic-eval[embed]"         # recommended: bundles default embedder
+pip install polyphonic-eval                  # bring-your-own embedder (must pass embedder= explicitly)
+pip install "polyphonic-eval[langgraph]"     # + LangGraph adapter
+pip install "polyphonic-eval[lm-eval]"       # + lm-evaluation-harness adapter
+pip install "polyphonic-eval[all]"           # everything
+```
+
+**Note on embedders**: the clustering result depends on the embedding model. The default is a lazy `sentence-transformers/all-MiniLM-L6-v2` wrapper. For reproducible eval pipelines, **pin a specific embedder** by passing `cluster_fn` or `embedder` to `aggregate()`. See `docs/design/0003-embedder-protocol.md`.
+
+---
+
 ## Adapters
 
 ### `lm-evaluation-harness`
 
-```python
+```yaml
 # config snippet
 metric_list:
   - metric: !function polyphonic_eval.adapters.lm_eval.polyphonic_metric
@@ -81,21 +126,26 @@ class JuryState(TypedDict):
 
 The reducer keeps every judge's vote typed; consumers see a `PolyphonicResult` at read-time.
 
-## Installation
+---
 
-```bash
-pip install "polyphonic-eval[embed]"         # recommended: bundles default embedder
-pip install polyphonic-eval                  # bring-your-own embedder (must pass embedder= explicitly)
-pip install "polyphonic-eval[langgraph]"     # + LangGraph adapter
-pip install "polyphonic-eval[lm-eval]"       # + lm-evaluation-harness adapter
-pip install "polyphonic-eval[all]"           # everything
-```
+## Key types
 
-**Note on embedders**: the clustering result depends on the embedding model. The default is a lazy `sentence-transformers/all-MiniLM-L6-v2` wrapper. For reproducible eval pipelines, **pin a specific embedder** by passing `cluster_fn` or `embedder` to `aggregate()`. See `docs/design/0003-embedder-protocol.md`.
+| Type | Description |
+|---|---|
+| `JudgeVerdict` | One judge's score, label, rationale, and optional confidence |
+| `PolyphonicResult` | Frozen aggregate: consensus + disagreement + spectrum |
+| `IrreducibleDisagreement` | Cluster structure + bootstrap stability flag |
+| `DisagreementCluster` | A group of judges with semantically similar rationales |
+| `ConsensusClaim` | Whether a quorum agreed within score tolerance |
+| `AggregatorConfig` | Tunable thresholds (ARI threshold, min cluster size, etc.) |
+
+---
 
 ## Background
 
 The package name nods to Mikhail Bakhtin's *polyphony* — a literary-critical observation that some texts hold multiple unresolved voices instead of collapsing them. The connection is intentional but is **not** load-bearing for use: every public function name uses ordinary disagreement/consensus/cluster vocabulary. See `docs/theory.md` if you want the longer story.
+
+---
 
 ## License
 
