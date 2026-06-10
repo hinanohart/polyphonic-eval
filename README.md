@@ -58,20 +58,9 @@ The cluster count and spectrum value depend on the embedding model. See the "Not
 
 ## Architecture
 
-```mermaid
-flowchart TD
-    Verdicts[JudgeVerdict list] --> Embedder[Embedder<br>rationale embeddings]
-    Embedder --> Cluster[HDBSCAN Clustering<br>cluster.py]
-    Cluster --> Irreducible[Irreducibility Check<br>bootstrap ARI<br>irreducible.py]
-    Cluster --> Spectrum[Disagreement Spectrum<br>spectrum.py]
-    Verdicts --> Consensus[Consensus Check<br>consensus.py]
-    Irreducible --> Result[PolyphonicResult<br>types.py]
-    Spectrum --> Result
-    Consensus --> Result
-    Result --> Adapters[Adapters]
-    Adapters --> LMEval[lm-evaluation-harness]
-    Adapters --> LangGraph[LangGraph reducer]
-```
+<div align="center">
+  <img src="docs/architecture.png" alt="polyphonic-eval architecture" width="840">
+</div>
 
 ---
 
@@ -150,3 +139,4 @@ The package name nods to Mikhail Bakhtin's *polyphony* — a literary-critical o
 ## License
 
 MIT. See `LICENSE`.
+

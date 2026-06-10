@@ -1,0 +1,46 @@
+direction: down
+explanation: |md
+  ### polyphonic-eval
+  **Multi-judge LLM evaluation that doesn't collapse minority signal** — returns typed disagreement structure, plugs into lm-evaluation-harness and LangGraph.
+| {near: top-center}
+
+verdicts: "① JudgeVerdict list" {shape: oval; style: {fill: "#6366f1"; font-color: "#fff"; stroke: "#4338ca"; bold: true; font-size: 18}}
+
+embedder: "② Embedder\nrationale embeddings" {style: {fill: "#0ea5e9"; font-color: "#fff"; stroke: "#0369a1"; bold: true; font-size: 18}}
+
+cluster: "③ HDBSCAN Clustering\ncluster.py" {style: {fill: "#0ea5e9"; font-color: "#fff"; stroke: "#0369a1"; bold: true}}
+
+checks: "Analysis Checks" {
+  style: {fill: "#f0fdf4"; stroke: "#10b981"; font-color: "#065f46"; bold: true; font-size: 16}
+  irreducible: "④ Irreducibility Check\nbootstrap ARI\nirreducible.py"
+  spectrum: "④ Disagreement Spectrum\nspectrum.py"
+  consensus: "④ Consensus Check\nconsensus.py"
+  *.style.fill: "#dcfce7"; *.style.font-color: "#065f46"
+}
+
+result: "⑤ PolyphonicResult\ntypes.py" {shape: cylinder; style: {fill: "#fdf2f8"; font-color: "#9d174e"; stroke: "#ec4899"; bold: true}}
+
+adapters: "Adapters" {
+  style: {fill: "#fffbeb"; stroke: "#f59e0b"; font-color: "#92400e"; bold: true; font-size: 16}
+  lmeval: "⑥ lm-evaluation-harness"
+  langgraph: "⑥ LangGraph reducer"
+  *.style.fill: "#fef3c7"; *.style.font-color: "#92400e"
+}
+
+verdicts -> embedder: "① embed"
+embedder -> cluster: "② cluster"
+cluster -> checks.irreducible: "③ check"
+cluster -> checks.spectrum: "③ analyze"
+verdicts -> checks.consensus: "③ check"
+checks.irreducible -> result: "④ collect"
+checks.spectrum -> result: "④ collect"
+checks.consensus -> result: "④ collect"
+result -> adapters.lmeval: "⑤ adapt"
+result -> adapters.langgraph: "⑤ adapt"
+
+legend: "Legend" {
+  near: bottom-center
+  style: {fill: "#f8fafc"; stroke: "#cbd5e1"; font-size: 13}
+  e: "● entry"; c: "● core"; p: "● processing"; b: "● adapter"; d: "● output"
+  e.style.font-color: "#4338ca"; c.style.font-color: "#0369a1"; p.style.font-color: "#10b981"; b.style.font-color: "#f59e0b"; d.style.font-color: "#ec4899"
+}
