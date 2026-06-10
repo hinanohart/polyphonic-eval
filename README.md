@@ -71,7 +71,7 @@ The cluster count and spectrum value depend on the embedding model. See the "Not
 3. **Bootstrap irreducibility check**: the cluster assignment is resampled N times and Adjusted Rand Index is computed. If the mean ARI exceeds the threshold (`0.6` by default), the disagreement is declared *irreducible* — the judge groups are structurally stable, not random variation.
 4. **Compute disagreement spectrum**: a scalar in `[0, 1]` reflecting how spread apart the cluster centroids are in embedding space. Zero means judges clumped together; higher means distinct camps.
 5. **Check consensus**: separately from clustering, a score-tolerance check identifies whether a quorum of judges agreed within a numeric band.
-6. **Return `PolyphonicResult`**: a frozen Pydantic model holding all of the above. `__float__` and `__bool__` are deliberately not implemented — callers must inspect typed fields.
+6. **Return `PolyphonicResult`**: a frozen Pydantic model holding all of the above. `__float__` is not implemented; `__bool__` is explicitly implemented to raise `TypeError` — both coercions are blocked, callers must inspect typed fields.
 
 ---
 
